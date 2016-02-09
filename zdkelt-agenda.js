@@ -1,4 +1,4 @@
-var ZdkeltAgenda = {
+Polymer({
     is: "zdkelt-agenda",
     properties: {
         /**
@@ -243,6 +243,4 @@ var ZdkeltAgenda = {
         drop.style.width = evt.target.parentNode.offsetWidth + "px";
         drop.toggle();
     }
-};
-
-Polymer(ZdkeltAgenda);
+});
