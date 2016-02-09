@@ -2,6 +2,7 @@
   "name": "zdkelt-agenda",
   "version": "0.0.0",
   "authors": [
+    "zedesk <dev@zedesk.net>",
     "fablec <fabrice.lecoz@telecomsante.com>"
   ],
   "description": "a agenda component",

@@ -7,9 +7,14 @@
     "test": "test"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "postinstall":"bower install",
+    "start":"polyserve"
   },
-  "author": "",
+  "author": [
+    "zedesk <dev@zedesk.net>",
+    "fablec <fabrice.lecoz@telecomsante.com>"
+  ],
   "license": "ISC",
   "devDependencies": {
     "bower": "^1.7.7",
