@@ -1,0 +1,286 @@
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../iron-flex-layout/iron-flex-layout.html">
+<link rel="import" href="../iron-icons/iron-icons.html">
+<link rel="import" href="../iron-pages/iron-pages.html">
+<link rel="import" href="../iron-dropdown/iron-dropdown.html">
+<link rel="import" href="../paper-styles/typography.html">
+<link rel="import" href="../paper-styles/paper-styles.html">
+<link rel="import" href="../paper-tabs/paper-tabs.html">
+<link rel="import" href="../paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../paper-button/paper-button.html">
+<link rel="import" href="../zdkelt-time/zdkelt-time.html">
+
+<script src="../moment/min/moment-with-locales.min.js" charset="utf-8"></script>
+
+<dom-module id="zdkelt-agenda">
+    <style>
+        :host {
+            display: block;
+            @apply(--paper-font-body1);
+        }
+
+        .spacer {
+            flex: 1
+        }
+
+        .today {
+            color: var(--primary-color);
+        }
+
+        section[data-view=month] .nm {
+            color: var(--disabled-text-color);
+        }
+
+        .weekEvent {
+            position: absolute;
+            margin: 0px 2px;
+            width: calc(100% - 4px);
+            border-radius: 5px;
+            box-sizing: border-box;
+            color: white;
+            background: #6C6C96;
+            padding: 2px 4px;
+        }
+
+        .monthEvent {
+            position: relative;
+            box-sizing: border-box;
+            color: white;
+            background: #6C6C96;
+            padding: 2px 4px;
+        }
+
+        section {
+            position: relative;
+            overflow: auto;
+            /* background: rgb(162, 195, 201);*/
+            @apply(--layout-vertical);
+            @apply(--layout-flex);
+        }
+
+        section[data-view=week] {
+            height: 800px;
+        }
+
+        .weekHeader {
+            @apply(--layout-horizontal);
+        }
+
+        .weekEvents {
+            border:2px solid gray;
+            border-top:none;
+            border-bottom:none;
+            position:relative;
+            @apply(--layout-flex);
+        }
+
+        .weekHeader .weekDay {
+            position: relative;
+            /*text-align: center;*/
+            border-radius: 5px;
+            box-sizing: border-box;
+            border: 2px solid gray;
+            border-bottom: none;
+            margin-bottom: -4px;
+            height: 80px;
+            font-size: 20px;
+            @apply(--layout-flex);
+        }
+
+        .weekDay .day {
+            position: absolute;
+            top: 40px;
+            font-size: 35px;
+            font-weight: bold;
+            text-align: center;
+            width: 100%;
+        }
+
+        .weekDay .label {
+            display: block;
+            padding: 10px;
+        }
+
+        .hours {
+            width: 50px;
+        }
+        .hourGrid {
+            border: 1px solid lightgray;
+            width: 100%;
+            position: absolute;
+            border-left: none;
+            border-right: none;
+            border-top:none;
+            box-sizing: border-box;
+            @apply(--layout-vertical);
+        }
+
+        .weekFooter {
+            @apply(--layout-horizontal);
+        }
+
+        .weekFooter .weekDay {
+            border: 2px solid gray;
+            border-radius: 5px;
+            border-top: none;
+            margin-top: -2px;
+            height: 5px;
+            @apply(--layout-flex);
+        }
+
+        .monthDayLabel,
+        .monthDay {
+            border: 1px solid gray;
+            padding: 5px;
+            @apply(--layout-flex);
+        }
+
+        .monthDay {
+            position: relative;
+            height: 120px;
+            overflow: hidden;
+        }
+
+        .monthDayMore {
+            position: absolute;
+            bottom: 0px;
+            background: white;
+            width: 100%;
+        }
+
+        .seeMore {
+            padding: 25px 4px 2px 4px;
+            box-sizing: border-box;
+        }
+        /*
+        .header {
+            background:var(--primary-color);
+            color: white;
+        }
+        */
+    </style>
+    <template>
+        <div class="layout horizontal header">
+            <template is="dom-if" if="{{showHour}}">
+                <div class="hours"></div>
+            </template>
+            <iron-pages main selected="{{view}}" attr-for-selected="data-view">
+                <div data-view="week" class="layout horizontal">
+                    <paper-icon-button icon="chevron-left" on-tap="_prevWeek"></paper-icon-button>
+                    <div style="align-self: center;min-width:250px">Semaine du
+                        <zdkelt-time datetime="[[_week.firstDayOfWeek]]" i18n="[[i18n]]" format="DD MMM"></zdkelt-time> au
+                        <zdkelt-time datetime="[[_week.lastDayOfWeek]]" i18n="[[i18n]]" format="DD MMM YYYY"></zdkelt-time>
+                    </div>
+                    <paper-icon-button icon="chevron-right" on-tap="_nextWeek"></paper-icon-button>
+                    <paper-button on-tap="_currentWeek">Aujourd'hui</paper-button>
+                </div>
+                <div data-view="month" class="layout horizontal">
+                    <paper-icon-button icon="chevron-left" on-tap="_prevMonth"></paper-icon-button>
+                    <div style="align-self: center;min-width:250px">
+                        <zdkelt-time datetime="[[_date]]" i18n="[[i18n]]" format="MMMM YYYY">
+                    </div>
+                    <paper-icon-button icon="chevron-right" on-tap="_nextMonth"></paper-icon-button>
+                    <paper-button on-tap="_currentMonth">Aujourd'hui</paper-button>
+                </div>
+            </iron-pages>
+            <div class="spacer"></div>
+            <paper-tabs class="bottom" selected="{{view}}" attr-for-selected="data-view" on-iron-select="_changeView">
+                <paper-tab data-view="week">Semaine</paper-tab>
+                <paper-tab data-view="month">Mois</paper-tab>
+            </paper-tabs>
+        </div>
+        <iron-pages main selected="{{view}}" attr-for-selected="data-view">
+            <section data-view="week">
+                <div class="weekHeader">
+                    <template is="dom-if" if="{{showHour}}">
+                        <div class="hours"></div>
+                    </template>
+                    <template is="dom-repeat" items="{{_week.days}}">
+                        <div class$="weekDay {{item.class}}">
+                            <span class="label"><zdkelt-time i18n="[[i18n]]" datetime="{{item.date}}" format="ddd"></zdkelt-time></span>
+                            <span class="day"><zdkelt-time i18n="[[i18n]]" datetime="{{item.date}}" format="DD"></zdkelt-time></span>
+                        </div>
+                    </template>
+                </div>
+
+                <div class="flex layout horizontal" id="events" style="box-sizing: border-box; background:white;position:relative;overflow:auto;">
+                    <template is="dom-if" if="{{showHour}}">
+                        <div class="hours">
+                            <template is="dom-repeat" items="[[_hours]]">
+                                <div class="hourGrid" style$="{{hourPos(item)}}">
+                                    <div class="flex"></div>
+                                    <div>{{item}}</div>
+                                </div>
+                            </template>
+                        </div>
+                    </template>
+                    <template is="dom-if" if="{{!showHour}}">
+                        <div>
+                            <template is="dom-repeat" items="[[_hours]]">
+                                <div class="hourGrid" style$="{{hourPos(item)}}"></div>
+                            </template>
+                        </div>
+                    </template>
+                    <template is="dom-repeat" items="{{_week.days}}" as="day">
+                        <div class="weekEvents" style$="{{weekEventsHeight()}}">
+                            <template is="dom-repeat" items="{{day.events}}" as="event">
+                                <div class="weekEvent" style$="{{ weekEventPos(event) }}" on-tap="showDetail">
+                                    {{event.title}}
+                                    <br/>{{event.label}}
+                                </div>
+                            </template>
+                        </div>
+                    </template>
+                </div>
+
+                <div class="weekFooter">
+                    <template is="dom-if" if="{{showHour}}">
+                        <div class="hours"></div>
+                    </template>
+                    <template is="dom-repeat" items="{{_week.days}}">
+                        <div class="weekDay"></div>
+                    </template>
+                </div>
+
+            </section>
+            <section data-view="month">
+                <div class="weekHeader">
+                    <template is="dom-repeat" items="{{_week.days}}">
+                        <div class="monthDayLabel">
+                            <span class="label">
+                                <zdkelt-time i18n="[[i18n]]" datetime="{{item.date}}" format="ddd">
+                            </span>
+                        </div>
+                    </template>
+                </div>
+                <!-- loop sur les week -->
+                <template is="dom-repeat" items="[[_month]]" as="week">
+                    <div class="flex layout horizontal" style="min-height:120px">
+                        <!-- loop sur les jours de la semaine -->
+                        <template is="dom-repeat" items="[[week.days]]" as="day">
+                            <div class$="monthDay {{day.class}}">
+                                <zdkelt-time i18n="[[i18n]]" datetime="{{day.date}}" format="DD"></zdkelt-time>
+                                <template is="dom-repeat" items="[[day.events]]" as="event">
+                                    <div class="monthEvent" on-tap="showDetail">{{event.title}}</div>
+                                </template>
+                                <template is="dom-if" if="{{dayMonthEventLength(day.events) }}">
+                                    <div class="monthDayMore" on-tap="seeMore">See more ...</div>
+                                </template>
+                                <iron-dropdown class="seeMore" id="test">
+                                    <div class="dropdown-content">
+                                        <template is="dom-repeat" items="[[day.events]]" as="event">
+                                            <div class="monthEvent" on-tap="showDetail">{{event.title}}</div>
+                                        </template>
+                                    </div>
+                                </iron-dropdown>
+                            </div>
+                        </template>
+                    </div>
+                </template>
+                </div>
+            </section>
+        </iron-pages>
+    </template>
+
+    <script src="zdkelt-agenda.js"></script>
+</dom-module>

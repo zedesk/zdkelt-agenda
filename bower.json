@@ -1,0 +1,26 @@
+{
+  "name": "zdkelt-agenda",
+  "version": "0.0.0",
+  "authors": [
+    "fablec <fabrice.lecoz@telecomsante.com>"
+  ],
+  "description": "a agenda component",
+  "main": "zdkelt-agenda.html",
+  "moduleType": [
+    "globals"
+  ],
+  "license": "ISC",
+  "homepage": "",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "polymer": "Polymer/polymer#^1.2.4",
+    "moment": "^2.11.2",
+    "zdkelt-time": "zedesk/zdkelt-time#^1.0.0"
+  }
+}
