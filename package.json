@@ -1,6 +1,6 @@
 {
   "name": "zdkelt-agenda",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "A webcomponent agenda",
   "main": "zdkelt-agenda.html",
   "directories": {
